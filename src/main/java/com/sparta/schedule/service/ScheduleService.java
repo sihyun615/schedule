@@ -53,9 +53,7 @@ public class ScheduleService {
 		Schedule schedule = findSchedule(id);
 
 		// 비밀번호 확인
-		if (!schedule.getPassword().equals(password)) {
-			throw new IllegalArgumentException("비밀번호가 일치하지 않아 수정이 불가능합니다.");
-		}
+		checkPassword(schedule.getPassword(), password);
 
 		// schedule 내용 수정
 		schedule.update(requestDto);
@@ -65,9 +63,28 @@ public class ScheduleService {
 		return scheduleResponseDto;
 	}
 
+	public Long deleteSchedule(Long id, String password) {
+		// 해당 일정이  DB에 존재하는지 확인
+		Schedule schedule = findSchedule(id);
+
+		// 비밀번호 확인
+		checkPassword(schedule.getPassword(), password);
+
+		// memo 삭제
+		scheduleRepository.delete(schedule);
+
+		return id;
+	}
+
 	private Schedule findSchedule(Long id) {
 		return scheduleRepository.findById(id).orElseThrow(() ->
-			new IllegalArgumentException("선택한 일정은 존재하지 않습니다.")
+				new IllegalArgumentException("선택한 일정은 존재하지 않습니다.")
 		);
+	}
+
+	private void checkPassword(String actualPassword, String providedPassword) {
+		if (!actualPassword.equals(providedPassword)) {
+			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+		}
 	}
 }

@@ -30,4 +30,12 @@ public class ScheduleService {
 
 		return scheduleResponseDto;
 	}
+
+	public ScheduleResponseDto getScheduleById(Long id) {
+		return scheduleRepository.findById(id)
+			.map(ScheduleResponseDto::new)
+			.orElseThrow(() ->
+			new IllegalArgumentException("선택한 일정은 존재하지 않습니다.")
+		);
+	}
 }

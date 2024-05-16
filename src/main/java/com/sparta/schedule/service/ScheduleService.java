@@ -1,5 +1,7 @@
 package com.sparta.schedule.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.sparta.schedule.dto.ScheduleRequestDto;
@@ -37,5 +39,10 @@ public class ScheduleService {
 			.orElseThrow(() ->
 			new IllegalArgumentException("선택한 일정은 존재하지 않습니다.")
 		);
+	}
+
+	public List<ScheduleResponseDto> getSchedules() {
+		// DB 조회
+		return scheduleRepository.findAllByOrderByCreatedAtDesc().stream().map(ScheduleResponseDto::new).toList();
 	}
 }

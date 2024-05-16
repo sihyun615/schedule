@@ -1,5 +1,7 @@
 package com.sparta.schedule.controller;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,5 +30,10 @@ public class ScheduleController {
 	@GetMapping("/schedule/info")
 	public ScheduleResponseDto getScheduleById(Long id) {
 		return scheduleService.getScheduleById(id);
+	}
+
+	@GetMapping("/schedules")
+	public List<ScheduleResponseDto> getSchedules() {
+		return scheduleService.getSchedules();
 	}
 }

@@ -3,6 +3,7 @@ package com.sparta.schedule.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.schedule.dto.ScheduleRequestDto;
 import com.sparta.schedule.dto.ScheduleResponseDto;
@@ -44,5 +45,29 @@ public class ScheduleService {
 	public List<ScheduleResponseDto> getSchedules() {
 		// DB 조회
 		return scheduleRepository.findAllByOrderByCreatedAtDesc().stream().map(ScheduleResponseDto::new).toList();
+	}
+
+	@Transactional
+	public ScheduleResponseDto updateSchedule(Long id, ScheduleRequestDto requestDto, String password) {
+		// 해당 일정이 DB에 존재하는지 확인
+		Schedule schedule = findSchedule(id);
+
+		// 비밀번호 확인
+		if (!schedule.getPassword().equals(password)) {
+			throw new IllegalArgumentException("비밀번호가 일치하지 않아 수정이 불가능합니다.");
+		}
+
+		// schedule 내용 수정
+		schedule.update(requestDto);
+
+		ScheduleResponseDto scheduleResponseDto = new ScheduleResponseDto(schedule);
+
+		return scheduleResponseDto;
+	}
+
+	private Schedule findSchedule(Long id) {
+		return scheduleRepository.findById(id).orElseThrow(() ->
+			new IllegalArgumentException("선택한 일정은 존재하지 않습니다.")
+		);
 	}
 }

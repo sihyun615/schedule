@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.schedule.dto.ScheduleRequestDto;
@@ -41,14 +40,15 @@ public class ScheduleController {
 		return scheduleService.getSchedules();
 	}
 
-	@PutMapping("/schedules/{id}")
+	@PutMapping("/schedule/{id}")
 	public ScheduleResponseDto updateSchedule(@PathVariable Long id, @RequestBody ScheduleRequestDto requestDto) {
 		String password = requestDto.getPassword();
 		return scheduleService.updateSchedule(id, requestDto, password);
 	}
 
-	@DeleteMapping("/schedules/{id}")
-	public Long deleteSchedule(@PathVariable Long id, @RequestParam String password) {
+	@DeleteMapping("/schedule/{id}")
+	public Long deleteSchedule(@PathVariable Long id, @RequestBody ScheduleRequestDto requestDto) {
+		String password = requestDto.getPassword();
 		return scheduleService.deleteSchedule(id, password);
 	}
 }

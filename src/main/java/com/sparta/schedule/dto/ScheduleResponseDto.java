@@ -11,7 +11,7 @@ public class ScheduleResponseDto {
 	private Long id;
 	private String title;
 	private String content;
-	private String manager;;
+	private String manager;
 	private LocalDateTime createdAt;
 
 	public ScheduleResponseDto(Schedule schedule) {

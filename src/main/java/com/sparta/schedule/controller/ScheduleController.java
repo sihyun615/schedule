@@ -15,23 +15,22 @@ import com.sparta.schedule.dto.ScheduleRequestDto;
 import com.sparta.schedule.dto.ScheduleResponseDto;
 import com.sparta.schedule.service.ScheduleService;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/api")
+@RequiredArgsConstructor // final로 선언된 멤버 변수를 파라미터로 사용하여 생성자를 자동으로 생성
 public class ScheduleController {
 
 	private final ScheduleService scheduleService;
-
-	public ScheduleController(ScheduleService scheduleService) {
-		this.scheduleService = scheduleService;
-	}
 
 	@PostMapping("/schedule")
 	public ScheduleResponseDto createSchedule(@RequestBody ScheduleRequestDto requestDto) {
 		return scheduleService.createSchedule(requestDto);
 	}
 
-	@GetMapping("/schedule/info")
-	public ScheduleResponseDto getScheduleById(Long id) {
+	@GetMapping("/schedule/{id}")
+	public ScheduleResponseDto getScheduleById(@PathVariable Long id) {
 		return scheduleService.getScheduleById(id);
 	}
 

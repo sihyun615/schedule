@@ -8,16 +8,17 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sparta.schedule.dto.ScheduleRequestDto;
 import com.sparta.schedule.dto.ScheduleResponseDto;
 import com.sparta.schedule.entity.Schedule;
+import com.sparta.schedule.exception.InvalidPasswordException;
+import com.sparta.schedule.exception.NotFoundException;
 import com.sparta.schedule.repository.ScheduleRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor // final로 선언된 멤버 변수를 파라미터로 사용하여 생성자를 자동으로 생성
 public class ScheduleService {
 
 	private final ScheduleRepository scheduleRepository;
-
-	public ScheduleService(ScheduleRepository scheduleRepository) {
-		this.scheduleRepository = scheduleRepository;
-	}
 
 	public ScheduleResponseDto createSchedule(ScheduleRequestDto requestDto) {
 
@@ -38,7 +39,7 @@ public class ScheduleService {
 		return scheduleRepository.findById(id)
 			.map(ScheduleResponseDto::new)
 			.orElseThrow(() ->
-			new IllegalArgumentException("선택한 일정은 존재하지 않습니다.")
+			new NotFoundException("선택한 일정은 존재하지 않습니다.")
 		);
 	}
 
@@ -78,13 +79,13 @@ public class ScheduleService {
 
 	private Schedule findSchedule(Long id) {
 		return scheduleRepository.findById(id).orElseThrow(() ->
-				new IllegalArgumentException("선택한 일정은 존재하지 않습니다.")
+				new NotFoundException("선택한 일정은 존재하지 않습니다.")
 		);
 	}
 
 	private void checkPassword(String actualPassword, String providedPassword) {
 		if (!actualPassword.equals(providedPassword)) {
-			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+			throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
 		}
 	}
 }

@@ -2,12 +2,14 @@ package com.sparta.schedule.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
 @Table(name = "comments")
+@NoArgsConstructor
 public class Comment extends Timestamped{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,4 +25,9 @@ public class Comment extends Timestamped{
 	@JoinColumn(name = "schedule_id", nullable = false)
 	private Schedule schedule;
 
+	public Comment(String content, String userId, Schedule schedule) {
+		this.content = content;
+		this.userId = userId;
+		this.schedule = schedule;
+	}
 }

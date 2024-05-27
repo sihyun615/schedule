@@ -1,5 +1,8 @@
 package com.sparta.schedule.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sparta.schedule.dto.ScheduleRequestDto;
 
 import jakarta.persistence.Column;
@@ -7,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,6 +33,9 @@ public class Schedule extends Timestamped{
 	private String manager;
 	@Column(name = "password", nullable = false)
 	private String password;
+
+	@OneToMany(mappedBy = "schedule")
+	private List<Comment> commentList = new ArrayList<>();
 
 	public Schedule(ScheduleRequestDto requestDto) {
 		this.title = requestDto.getTitle();

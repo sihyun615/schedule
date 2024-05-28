@@ -14,6 +14,7 @@ import com.sparta.schedule.dto.CommentResponseDto;
 import com.sparta.schedule.entity.Response;
 import com.sparta.schedule.service.CommentService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -25,19 +26,19 @@ public class CommentController {
 
 	// 댓글 작성
 	@PostMapping("/comment")
-	public CommentResponseDto createComment(@RequestBody CommentRequestDto requestDto) {
+	public CommentResponseDto createComment(@Valid @RequestBody CommentRequestDto requestDto) {
 		return commentService.createComment(requestDto);
 	}
 
 	// 댓글 수정
 	@PutMapping("/comment/{commentId}")
-	public CommentResponseDto updateComment(@PathVariable Long commentId, @RequestBody CommentRequestDto requestDto) {
+	public CommentResponseDto updateComment(@PathVariable Long commentId, @Valid @RequestBody CommentRequestDto requestDto) {
 		return commentService.updateComment(commentId, requestDto);
 	}
 
 	// 댓글 삭제
 	@DeleteMapping("/comment/{commentId}")
-	public ResponseEntity<Response> deleteComment(@PathVariable Long commentId, @RequestBody CommentRequestDto requestDto) {
+	public ResponseEntity<Response> deleteComment(@PathVariable Long commentId, @Valid @RequestBody CommentRequestDto requestDto) {
 		return commentService.deleteComment(commentId, requestDto);
 	}
 }

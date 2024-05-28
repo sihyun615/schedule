@@ -1,7 +1,6 @@
 package com.sparta.schedule.service;
 
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,77 +25,22 @@ public class CommentService {
 	private final ScheduleRepository scheduleRepository;
 
 	public CommentResponseDto createComment(CommentRequestDto requestDto) {
-
-		Long scheduleId = requestDto.getScheduleId();
-		if (scheduleId == null) {
-			throw new IllegalArgumentException("댓글을 작성할 일정의 ID가 입력되지 않았습니다.");
-		}
-
-		String content = requestDto.getContent();
-		if (content.isEmpty()) {
-			throw new IllegalArgumentException("댓글의 내용이 비어있습니다.");
-		}
-
-		String userId = requestDto.getUserId();
-		if (userId.isEmpty()) {
-			throw new IllegalArgumentException("작성자 ID가 입력되지 않았습니다.");
-		}
-
-
-		// 선택한 일정이 DB에 저장되어 있는지 확인
-		Optional<Schedule> checkSchedule = scheduleRepository.findById(scheduleId);
-		if (checkSchedule.isEmpty()) {
-			throw new NoSuchElementException("선택한 일정을 찾을 수 없습니다.");
-		}
-
-		Schedule schedule = checkSchedule.get();
-
-		Comment comment = new Comment(content, userId, schedule);
+		Schedule schedule = findScheduleById(requestDto.getScheduleId());
+		Comment comment = new Comment(requestDto.getContent(), requestDto.getUserId(), schedule);
 		commentRepository.save(comment);
 		return new CommentResponseDto(comment);
 	}
 
 	@Transactional
 	public CommentResponseDto updateComment(Long commentId, CommentRequestDto requestDto) {
-		Long scheduleId = requestDto.getScheduleId();
-		if (scheduleId == null) {
-			throw new IllegalArgumentException("댓글을 작성할 일정의 ID가 입력되지 않았습니다.");
-		}
+		checkCommentIdNull(commentId);  // 댓글 Id 입력받았는지 확인
+		findScheduleById(requestDto.getScheduleId());  // 선택한 일정이 DB에 저장되어 있는지 확인
 
-		if (commentId == null) {
-			throw new IllegalArgumentException("댓글의 ID가 입력되지 않았습니다.");
-		}
-
-		String newContent = requestDto.getContent();
-		if (newContent.isEmpty()) {
-			throw new IllegalArgumentException("댓글의 내용이 비어있습니다.");
-		}
-
-		String userId = requestDto.getUserId();
-		if (userId.isEmpty()) {
-			throw new IllegalArgumentException("작성자 ID가 입력되지 않았습니다.");
-		}
-
-
-		// 선택한 일정이 DB에 저장되어 있는지 확인
-		Optional<Schedule> checkSchedule = scheduleRepository.findById(scheduleId);
-		if (checkSchedule.isEmpty()) {
-			throw new NoSuchElementException("선택한 일정을 찾을 수 없습니다.");
-		}
-
-		// 선택한 댓글이 DB에 저장되어 있는지 확인
-		Optional<Comment> checkComment = commentRepository.findById(commentId);
-		if (checkComment.isEmpty()) {
-			throw new NoSuchElementException("선택한 댓글을 찾을 수 없습니다.");
-		}
-
-		Comment comment = checkComment.get();
-
-		if (!comment.getUserId().equals(userId)) {
-			throw new IllegalArgumentException("선택한 댓글의 사용자가 현재 사용자와 일치하지 않습니다.");
-		}
+		// 댓글 ID로 댓글 조회 및 사용자 ID로 권한 확인
+		Comment comment = findCommentByIdAndUserId(commentId, requestDto.getUserId());
 
 		// 댓글 내용이 변경되었는지 확인하고 변경된 경우에만 업데이트
+		String newContent = requestDto.getContent();
 		if (!newContent.equals(comment.getContent())) {
 			comment.setContent(newContent);
 			commentRepository.save(comment);
@@ -107,45 +51,44 @@ public class CommentService {
 
 
 	public ResponseEntity<Response> deleteComment(Long commentId, CommentRequestDto requestDto) {
-		Long scheduleId = requestDto.getScheduleId();
-		if (scheduleId == null) {
-			throw new IllegalArgumentException("댓글을 작성할 일정의 ID가 입력되지 않았습니다.");
-		}
+		checkCommentIdNull(commentId);  //댓글 Id 입력받았는지 확인
+		findScheduleById(requestDto.getScheduleId());  // 선택한 일정이 DB에 저장되어 있는지 확인
 
+		// 댓글 ID로 댓글 조회 및 사용자 ID로 권한 확인
+		Comment comment = findCommentByIdAndUserId(commentId, requestDto.getUserId());
+
+		commentRepository.delete(comment);  // 댓글 삭제
+
+		Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 삭제되었습니다.");
+		return ResponseEntity.ok(response);  // 성공 메시지와 상태 코드 반환
+	}
+
+
+	// 댓글 ID 유효성 검사 메소드
+	private void checkCommentIdNull(Long commentId) {
 		if (commentId == null) {
 			throw new IllegalArgumentException("댓글의 ID가 입력되지 않았습니다.");
 		}
+	}
 
-		String userId = requestDto.getUserId();
-		if (userId.isEmpty()) {
-			throw new IllegalArgumentException("작성자 ID가 입력되지 않았습니다.");
-		}
+	// 선택한 일정이 DB에 저장되어 있는지 확인하는 메소드
+	private Schedule findScheduleById(Long scheduleId) {
+		return scheduleRepository.findById(scheduleId)
+			.orElseThrow(() -> new NoSuchElementException("선택한 일정을 찾을 수 없습니다."));
+	}
 
-		// 선택한 일정이 DB에 저장되어 있는지 확인
-		Optional<Schedule> checkSchedule = scheduleRepository.findById(scheduleId);
-		if (checkSchedule.isEmpty()) {
-			throw new NoSuchElementException("선택한 일정을 찾을 수 없습니다.");
-		}
+	// 선택한 댓글이 DB에 저장되어 있는지 확인하는 메소드
+	private Comment findCommentById(Long commentId) {
+		return commentRepository.findById(commentId)
+			.orElseThrow(() -> new NoSuchElementException("선택한 댓글을 찾을 수 없습니다."));
+	}
 
-		// 선택한 댓글이 DB에 저장되어 있는지 확인
-		Optional<Comment> commentOptional = commentRepository.findById(commentId);
-		if (commentOptional.isEmpty()) {
-			throw new NoSuchElementException("선택한 댓글을 찾을 수 없습니다.");
-		}
-
-		Comment comment = commentOptional.get();
-
-		// 선택한 댓글의 사용자가 현재 사용자와 일치하지 않으면 예외 발생
+	// 댓글 ID로 댓글 조회 및 사용자 ID로 권한 확인 메소드
+	private Comment findCommentByIdAndUserId(Long commentId, String userId) {
+		Comment comment = findCommentById(commentId);  // 선택한 댓글이 DB에 저장되어 있는지 확인
 		if (!comment.getUserId().equals(userId)) {
 			throw new IllegalArgumentException("선택한 댓글의 사용자가 현재 사용자와 일치하지 않습니다.");
 		}
-
-		// 댓글 삭제
-		commentRepository.delete(comment);
-
-		Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 삭제되었습니다.");
-
-		// 성공 메시지와 상태 코드 반환
-		return ResponseEntity.ok(response);
+		return comment;
 	}
 }

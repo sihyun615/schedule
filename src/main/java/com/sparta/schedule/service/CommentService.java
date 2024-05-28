@@ -3,12 +3,15 @@ package com.sparta.schedule.service;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.schedule.dto.CommentRequestDto;
 import com.sparta.schedule.dto.CommentResponseDto;
 import com.sparta.schedule.entity.Comment;
+import com.sparta.schedule.entity.Response;
 import com.sparta.schedule.entity.Schedule;
 import com.sparta.schedule.repository.CommentRepository;
 import com.sparta.schedule.repository.ScheduleRepository;
@@ -100,5 +103,49 @@ public class CommentService {
 		}
 
 		return new CommentResponseDto(comment);
+	}
+
+
+	public ResponseEntity<Response> deleteComment(Long commentId, CommentRequestDto requestDto) {
+		Long scheduleId = requestDto.getScheduleId();
+		if (scheduleId == null) {
+			throw new IllegalArgumentException("댓글을 작성할 일정의 ID가 입력되지 않았습니다.");
+		}
+
+		if (commentId == null) {
+			throw new IllegalArgumentException("댓글의 ID가 입력되지 않았습니다.");
+		}
+
+		String userId = requestDto.getUserId();
+		if (userId.isEmpty()) {
+			throw new IllegalArgumentException("작성자 ID가 입력되지 않았습니다.");
+		}
+
+		// 선택한 일정이 DB에 저장되어 있는지 확인
+		Optional<Schedule> checkSchedule = scheduleRepository.findById(scheduleId);
+		if (checkSchedule.isEmpty()) {
+			throw new NoSuchElementException("선택한 일정을 찾을 수 없습니다.");
+		}
+
+		// 선택한 댓글이 DB에 저장되어 있는지 확인
+		Optional<Comment> commentOptional = commentRepository.findById(commentId);
+		if (commentOptional.isEmpty()) {
+			throw new NoSuchElementException("선택한 댓글을 찾을 수 없습니다.");
+		}
+
+		Comment comment = commentOptional.get();
+
+		// 선택한 댓글의 사용자가 현재 사용자와 일치하지 않으면 예외 발생
+		if (!comment.getUserId().equals(userId)) {
+			throw new IllegalArgumentException("선택한 댓글의 사용자가 현재 사용자와 일치하지 않습니다.");
+		}
+
+		// 댓글 삭제
+		commentRepository.delete(comment);
+
+		Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 삭제되었습니다.");
+
+		// 성공 메시지와 상태 코드 반환
+		return ResponseEntity.ok(response);
 	}
 }

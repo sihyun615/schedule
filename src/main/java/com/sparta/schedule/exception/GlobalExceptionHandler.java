@@ -5,18 +5,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import com.sparta.schedule.entity.Response;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(NotFoundException.class)
-	public ResponseEntity<ErrorResponse> handleNotFoundException(NotFoundException ex) {
-		ErrorResponse errorResponse = new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
-		return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+	public ResponseEntity<Response> handleNotFoundException(NotFoundException ex) {
+		Response response = new Response(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+		return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
 	}
 
 	@ExceptionHandler(InvalidPasswordException.class)
-	public ResponseEntity<ErrorResponse> handleInvalidPasswordException(InvalidPasswordException ex) {
-		ErrorResponse errorResponse = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
-		return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+	public ResponseEntity<Response> handleInvalidPasswordException(InvalidPasswordException ex) {
+		Response response = new Response(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
+		return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
 	}
 }

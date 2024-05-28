@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.sparta.schedule.dto.ScheduleRequestDto;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,7 +35,7 @@ public class Schedule extends Timestamped{
 	@Column(name = "password", nullable = false)
 	private String password;
 
-	@OneToMany(mappedBy = "schedule")
+	@OneToMany(mappedBy = "schedule", cascade = CascadeType.REMOVE)
 	private List<Comment> commentList = new ArrayList<>();
 
 	public Schedule(ScheduleRequestDto requestDto) {

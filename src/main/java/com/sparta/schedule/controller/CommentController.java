@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.schedule.dto.CommentRequestDto;
 import com.sparta.schedule.entity.Response;
+import com.sparta.schedule.exception.InvalidTokenException;
 import com.sparta.schedule.jwt.JwtUtil;
 import com.sparta.schedule.service.CommentService;
 
@@ -40,8 +41,7 @@ public class CommentController {
 			Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 작성되었습니다.");
 			return ResponseEntity.ok(response);  // 성공 메시지와 상태 코드 반환
 		} else {
-			Response response = new Response(HttpStatus.UNAUTHORIZED.value(), "토큰이 유효하지 않습니다.");
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+			throw new InvalidTokenException("토큰이 유효하지 않습니다.");
 		}
 	}
 
@@ -57,8 +57,7 @@ public class CommentController {
 			Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 수정되었습니다.");
 			return ResponseEntity.ok(response);  // 성공 메시지와 상태 코드 반환
 		} else {
-			Response response = new Response(HttpStatus.UNAUTHORIZED.value(), "토큰이 유효하지 않습니다.");
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+			throw new InvalidTokenException("토큰이 유효하지 않습니다.");
 		}
 	}
 
@@ -70,11 +69,11 @@ public class CommentController {
 			Claims claims = jwtUtil.getUserInfoFromToken(token);
 			String username = claims.getSubject();
 			commentService.deleteComment(commentId, username, requestDto);
+
 			Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 삭제되었습니다.");
 			return ResponseEntity.ok(response);  // 성공 메시지와 상태 코드 반환
 		} else {
-			Response response = new Response(HttpStatus.UNAUTHORIZED.value(), "토큰이 유효하지 않습니다.");
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+			throw new InvalidTokenException("토큰이 유효하지 않습니다.");
 		}
 	}
 }

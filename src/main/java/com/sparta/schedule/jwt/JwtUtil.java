@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.slf4j.Logger;
@@ -16,21 +17,29 @@ import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 
+import com.sparta.schedule.entity.User;
 import com.sparta.schedule.entity.UserRoleEnum;
+import com.sparta.schedule.exception.InvalidTokenException;
+import com.sparta.schedule.exception.NotFoundException;
+import com.sparta.schedule.repository.UserRepository;
 
 @Slf4j(topic = "JwtUtil")
 @Component
+@RequiredArgsConstructor
 public class JwtUtil {
 
 	//JWT 데이터
 	// Header KEY 값
 	public static final String AUTHORIZATION_HEADER = "Authorization";
+	public static final String REFRESH_HEADER = "Refresh-Token";
 	// 사용자 권한 값의 KEY
 	public static final String AUTHORIZATION_KEY = "auth";
 	// Token 식별자
 	public static final String BEARER_PREFIX = "Bearer ";
 	// 토큰 만료시간
-	private final long TOKEN_TIME = 60 * 60 * 1000L; // 60분
+	// private final long TOKEN_TIME = 60 * 60 * 1000L; // 60분
+	private final long ACCESS_TOKEN_TIME = 60 * 60 * 1000L; // 15분
+	private final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000L; // 7일
 
 	@Value("${jwt.secret.key}") // Base64 Encode 한 SecretKey
 	private String secretKey;
@@ -40,6 +49,8 @@ public class JwtUtil {
 	// 로그 설정
 	public static final Logger logger = LoggerFactory.getLogger("JWT 관련 로그");
 
+	private final UserRepository userRepository;
+
 	@PostConstruct
 	public void init() {
 		byte[] bytes = Base64.getDecoder().decode(secretKey);
@@ -48,22 +59,57 @@ public class JwtUtil {
 
 
 	//JWT 생성 (토큰 생성)
-	public String createToken(String username, UserRoleEnum role) {
+	public String createAccessToken(String username, UserRoleEnum role) {
 		Date date = new Date();
 
 		return BEARER_PREFIX +
 			Jwts.builder()
 				.setSubject(username) // 사용자 식별자값(ID)
 				.claim(AUTHORIZATION_KEY, role) // 사용자 권한
-				.setExpiration(new Date(date.getTime() + TOKEN_TIME)) // 만료 시간
+				.setExpiration(new Date(date.getTime() + ACCESS_TOKEN_TIME)) // 만료 시간
 				.setIssuedAt(date) // 발급일
 				.signWith(key, signatureAlgorithm) // 암호화 알고리즘
 				.compact();
 	}
 
+	public String createRefreshToken(String username) {
+		Date date = new Date();
+		return BEARER_PREFIX +
+			Jwts.builder()
+				.setSubject(username)
+				.setExpiration(new Date(date.getTime() + REFRESH_TOKEN_TIME))
+				.setIssuedAt(date)
+				.signWith(key, signatureAlgorithm)
+				.compact();
+	}
 
-	//header 에서 JWT 가져오기
-	public String getJwtFromHeader(HttpServletRequest request) {
+	public String generateNewAccessToken(String refreshToken) {
+		Claims claims = getUserInfoFromToken(refreshToken);
+		String username = claims.getSubject();
+		User user = userRepository.findByUsername(username).orElseThrow(
+			() -> new NotFoundException("등록된 사용자가 없습니다.")
+		);
+		return createAccessToken(username, user.getRole());
+	}
+
+	public String checkToken(String accessToken, String refreshToken) {
+		// Access Token과 Refresh Token이 모두 유효하지 않은 경우
+		if (!validateToken(accessToken) && !validateToken(refreshToken)) {
+			// Refresh Token 만료로 인한 인증 실패 처리 및 재로그인 유도
+			throw new InvalidTokenException("Refresh Token이 만료되었거나 유효하지 않습니다. 다시 로그인하세요.");
+		}
+		// Access Token은 유효하지 않고 Refresh Token은 유효한 경우
+		else if (!validateToken(accessToken) && validateToken(refreshToken)) {
+			// Refresh Token을 사용하여 새로운 Access Token 생성
+			return generateNewAccessToken(refreshToken);
+		} else {
+			// Refresh Token과 Access Token이 유효한 경우
+			return accessToken;
+		}
+	}
+
+	// 토큰 헤더에서 Access Token을 가져오는 메서드
+	public String getAccessTokenFromHeader(HttpServletRequest request) {
 		String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
 		if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
 			return bearerToken.substring(7);
@@ -71,6 +117,14 @@ public class JwtUtil {
 		return null;
 	}
 
+	// 토큰 헤더에서 Refresh Token을 가져오는 메서드
+	public String getRefreshTokenFromHeader(HttpServletRequest request) {
+		String refreshToken = request.getHeader(REFRESH_HEADER);
+		if (StringUtils.hasText(refreshToken) && refreshToken.startsWith(BEARER_PREFIX)) {
+			return refreshToken.substring(7);
+		}
+		return null;
+	}
 
 	//JWT 토큰 검증
 	public boolean validateToken(String token) {

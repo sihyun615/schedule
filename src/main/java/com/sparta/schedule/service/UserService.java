@@ -78,11 +78,11 @@ public class UserService {
 			throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
 		}
 
-		String token = jwtUtil.createToken(user.getUsername(), user.getRole());
+		String accessToken = jwtUtil.createAccessToken(user.getUsername(), user.getRole());
+		String refreshToken = jwtUtil.createRefreshToken(user.getUsername());
 
-		// JWT를 헤더에 추가
-		res.addHeader(JwtUtil.AUTHORIZATION_HEADER, token);
-
+		res.addHeader(JwtUtil.AUTHORIZATION_HEADER, accessToken);
+		res.addHeader(JwtUtil.REFRESH_HEADER, refreshToken);
 
 		Response response = new Response(HttpStatus.OK.value(), "로그인이 성공적으로 완료되었습니다.");
 		return ResponseEntity.ok(response);

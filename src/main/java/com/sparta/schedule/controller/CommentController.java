@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.schedule.dto.CommentRequestDto;
 import com.sparta.schedule.entity.Response;
-import com.sparta.schedule.exception.InvalidTokenException;
 import com.sparta.schedule.jwt.JwtUtil;
 import com.sparta.schedule.service.CommentService;
 
@@ -32,48 +31,60 @@ public class CommentController {
 	// 댓글 작성
 	@PostMapping("/comment")
 	public ResponseEntity<Response> createComment(@Valid @RequestBody CommentRequestDto requestDto, HttpServletRequest req) {
-		String token = jwtUtil.getJwtFromHeader(req);
-		if (token != null && jwtUtil.validateToken(token)) {
-			Claims claims = jwtUtil.getUserInfoFromToken(token);
-			String username = claims.getSubject();
-			commentService.createComment(username, requestDto);
+		// Access Token과 Refresh Token을 각각의 헤더에서 가져옴
+		String accessToken = jwtUtil.getAccessTokenFromHeader(req);
+		String refreshToken = jwtUtil.getRefreshTokenFromHeader(req);
 
-			Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 작성되었습니다.");
-			return ResponseEntity.ok(response);  // 성공 메시지와 상태 코드 반환
-		} else {
-			throw new InvalidTokenException("토큰이 유효하지 않습니다.");
-		}
+		String newAccessToken = jwtUtil.checkToken(accessToken, refreshToken);
+
+		Claims claims = jwtUtil.getUserInfoFromToken(newAccessToken);
+		String username = claims.getSubject();
+
+		// 댓글 생성 또는 수정
+		commentService.createComment(username, requestDto);
+
+		// 응답 반환
+		Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 등록되었습니다.");
+		return ResponseEntity.ok(response);
 	}
 
 	// 댓글 수정
 	@PutMapping("/comment/{commentId}")
 	public ResponseEntity<Response> updateComment(@PathVariable Long commentId, @Valid @RequestBody CommentRequestDto requestDto, HttpServletRequest req) {
-		String token = jwtUtil.getJwtFromHeader(req);
-		if (token != null && jwtUtil.validateToken(token)) {
-			Claims claims = jwtUtil.getUserInfoFromToken(token);
-			String username = claims.getSubject();
-			commentService.updateComment(commentId, username, requestDto);
+		// Access Token과 Refresh Token을 각각의 헤더에서 가져옴
+		String accessToken = jwtUtil.getAccessTokenFromHeader(req);
+		String refreshToken = jwtUtil.getRefreshTokenFromHeader(req);
 
-			Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 수정되었습니다.");
-			return ResponseEntity.ok(response);  // 성공 메시지와 상태 코드 반환
-		} else {
-			throw new InvalidTokenException("토큰이 유효하지 않습니다.");
-		}
+		String newAccessToken = jwtUtil.checkToken(accessToken, refreshToken);
+
+		Claims claims = jwtUtil.getUserInfoFromToken(newAccessToken);
+		String username = claims.getSubject();
+
+		// 댓글 생성 또는 수정
+		commentService.updateComment(commentId, username, requestDto);
+
+		// 응답 반환
+		Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 수정되었습니다.");
+		return ResponseEntity.ok(response);
 	}
 
 	// 댓글 삭제
 	@DeleteMapping("/comment/{commentId}")
 	public ResponseEntity<Response> deleteComment(@PathVariable Long commentId, @RequestBody CommentRequestDto requestDto, HttpServletRequest req) {
-		String token = jwtUtil.getJwtFromHeader(req);
-		if (token != null && jwtUtil.validateToken(token)) {
-			Claims claims = jwtUtil.getUserInfoFromToken(token);
-			String username = claims.getSubject();
-			commentService.deleteComment(commentId, username, requestDto);
+		// Access Token과 Refresh Token을 각각의 헤더에서 가져옴
+		String accessToken = jwtUtil.getAccessTokenFromHeader(req);
+		String refreshToken = jwtUtil.getRefreshTokenFromHeader(req);
 
-			Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 삭제되었습니다.");
-			return ResponseEntity.ok(response);  // 성공 메시지와 상태 코드 반환
-		} else {
-			throw new InvalidTokenException("토큰이 유효하지 않습니다.");
-		}
+		String newAccessToken = jwtUtil.checkToken(accessToken, refreshToken);
+
+		Claims claims = jwtUtil.getUserInfoFromToken(newAccessToken);
+		String username = claims.getSubject();
+
+		// 댓글 삭제
+		commentService.deleteComment(commentId, username, requestDto);
+
+		// 응답 반환
+		Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 삭제되었습니다.");
+		return ResponseEntity.ok(response);
 	}
 }

@@ -93,13 +93,12 @@ public class JwtUtil {
 	}
 
 	public String checkToken(String accessToken, String refreshToken) {
-		// Access Token과 Refresh Token이 모두 유효하지 않은 경우
-		if (!validateToken(accessToken) && !validateToken(refreshToken)) {
+		if (!validateToken(refreshToken)) {
 			// Refresh Token 만료로 인한 인증 실패 처리 및 재로그인 유도
 			throw new InvalidTokenException("Refresh Token이 만료되었거나 유효하지 않습니다. 다시 로그인하세요.");
 		}
-		// Access Token은 유효하지 않고 Refresh Token은 유효한 경우
-		else if (!validateToken(accessToken) && validateToken(refreshToken)) {
+
+		if (!validateToken(accessToken)) {
 			// Refresh Token을 사용하여 새로운 Access Token 생성
 			return generateNewAccessToken(refreshToken);
 		} else {

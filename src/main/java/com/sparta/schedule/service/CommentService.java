@@ -6,9 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sparta.schedule.dto.CommentRequestDto;
 import com.sparta.schedule.entity.Comment;
 import com.sparta.schedule.entity.Schedule;
+import com.sparta.schedule.entity.User;
 import com.sparta.schedule.exception.NotFoundException;
 import com.sparta.schedule.repository.CommentRepository;
 import com.sparta.schedule.repository.ScheduleRepository;
+import com.sparta.schedule.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,10 +20,14 @@ public class CommentService {
 
 	private final CommentRepository commentRepository;
 	private final ScheduleRepository scheduleRepository;
+	private final UserRepository userRepository;
 
 	public void createComment(String username, CommentRequestDto requestDto) {
 		Schedule schedule = findScheduleById(requestDto.getScheduleId());
-		Comment comment = new Comment(requestDto.getContent(), username, schedule);
+		User user = userRepository.findByUsername(username).orElseThrow(
+			() -> new NotFoundException("등록된 사용자가 없습니다.")
+		);
+		Comment comment = new Comment(requestDto.getContent(), user, schedule);
 		commentRepository.save(comment);
 	}
 
@@ -73,9 +79,9 @@ public class CommentService {
 	}
 
 	// 댓글 ID로 댓글 조회 및 사용자 ID로 권한 확인 메소드
-	private Comment findCommentByIdAndUserId(Long commentId, String userId) {
+	private Comment findCommentByIdAndUserId(Long commentId, String username) {
 		Comment comment = findCommentById(commentId);  // 선택한 댓글이 DB에 저장되어 있는지 확인
-		if (!comment.getUserId().equals(userId)) {
+		if (!comment.getUser().getUsername().equals(username)) {
 			throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
 		}
 		return comment;

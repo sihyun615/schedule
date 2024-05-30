@@ -40,6 +40,9 @@ public class User extends Timestamped{
 	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
 	private List<Schedule> schedules = new ArrayList<>();
 
+	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+	private List<Comment> comments = new ArrayList<>();
+
 	public User(String username, String nickname, String password, UserRoleEnum role) {
 		this.username = username;
 		this.nickname = nickname;

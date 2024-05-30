@@ -18,16 +18,17 @@ public class Comment extends Timestamped{
 	@Column(name = "content", nullable = false, length = 500)
 	private String content;
 
-	@Column(name = "user_id", nullable = false)
-	private String userId;
+	@ManyToOne
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
 	@ManyToOne
 	@JoinColumn(name = "schedule_id", nullable = false)
 	private Schedule schedule;
 
-	public Comment(String content, String userId, Schedule schedule) {
+	public Comment(String content, User user, Schedule schedule) {
 		this.content = content;
-		this.userId = userId;
+		this.user = user;
 		this.schedule = schedule;
 	}
 }

@@ -32,23 +32,19 @@ public class Schedule extends Timestamped{
 	private String content;
 	@Column(name = "manager", nullable = false)
 	private String manager;
-	@Column(name = "password", nullable = false)
-	private String password;
 
 	@OneToMany(mappedBy = "schedule", cascade = CascadeType.REMOVE)
 	private List<Comment> commentList = new ArrayList<>();
 
-	public Schedule(ScheduleRequestDto requestDto) {
-		this.title = requestDto.getTitle();
-		this.content = requestDto.getContent();
-		this.manager = requestDto.getManager();
-		this.password = requestDto.getPassword();
+	public Schedule(String title, String content, String manager) {
+		this.title = title;
+		this.content = content;
+		this.manager = manager;
 	}
 
-	public void update(ScheduleRequestDto requestDto) {
-		this.title = requestDto.getTitle();
-		this.content = requestDto.getContent();
-		this.manager = requestDto.getManager();
-		this.password = requestDto.getPassword();
+	public void update(String title, String content, String manager) {
+		this.title = title;
+		this.content = content;
+		this.manager = manager;
 	}
 }

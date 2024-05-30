@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.schedule.dto.ScheduleRequestDto;
 import com.sparta.schedule.dto.ScheduleResponseDto;
+import com.sparta.schedule.entity.Comment;
 import com.sparta.schedule.entity.Schedule;
 import com.sparta.schedule.exception.InvalidPasswordException;
 import com.sparta.schedule.exception.NotFoundException;
@@ -20,19 +21,15 @@ public class ScheduleService {
 
 	private final ScheduleRepository scheduleRepository;
 
-	public ScheduleResponseDto createSchedule(ScheduleRequestDto requestDto) {
+	public void createSchedule(String username, ScheduleRequestDto requestDto) {
+		String title = requestDto.getTitle();
+		String content = requestDto.getContent();
 
 		// RequestDto -> Entity
-		Schedule schedule = new Schedule(requestDto);
+		Schedule schedule = new Schedule(title, content, username);
 
 		// DB 저장
-		Schedule saveSchedule = scheduleRepository.save(schedule);
-
-
-		// Entity -> ResponseDto
-		ScheduleResponseDto scheduleResponseDto = new ScheduleResponseDto(schedule);
-
-		return scheduleResponseDto;
+		scheduleRepository.save(schedule);
 	}
 
 	public ScheduleResponseDto getScheduleById(Long id) {
@@ -49,32 +46,23 @@ public class ScheduleService {
 	}
 
 	@Transactional
-	public ScheduleResponseDto updateSchedule(Long id, ScheduleRequestDto requestDto, String password) {
+	public void updateSchedule(String username, Long scheduleId, ScheduleRequestDto requestDto) {
 		// 해당 일정이 DB에 존재하는지 확인
-		Schedule schedule = findSchedule(id);
+		Schedule schedule = findScheduleByIdAndUserId(scheduleId, username);
 
-		// 비밀번호 확인
-		checkPassword(schedule.getPassword(), password);
+		String title = requestDto.getTitle();
+		String content = requestDto.getContent();
 
 		// schedule 내용 수정
-		schedule.update(requestDto);
-
-		ScheduleResponseDto scheduleResponseDto = new ScheduleResponseDto(schedule);
-
-		return scheduleResponseDto;
+		schedule.update(title, content, username);
 	}
 
-	public Long deleteSchedule(Long id, String password) {
+	public void deleteSchedule(String username, Long scheduleId) {
 		// 해당 일정이  DB에 존재하는지 확인
-		Schedule schedule = findSchedule(id);
-
-		// 비밀번호 확인
-		checkPassword(schedule.getPassword(), password);
+		Schedule schedule = findScheduleByIdAndUserId(scheduleId, username);
 
 		// memo 삭제
 		scheduleRepository.delete(schedule);
-
-		return id;
 	}
 
 	private Schedule findSchedule(Long id) {
@@ -83,9 +71,12 @@ public class ScheduleService {
 		);
 	}
 
-	private void checkPassword(String actualPassword, String providedPassword) {
-		if (!actualPassword.equals(providedPassword)) {
-			throw new InvalidPasswordException("비밀번호가 일치하지 않습니다.");
+	// 일정 ID로 일정 조회 및 사용자 ID로 권한 확인 메소드
+	private Schedule findScheduleByIdAndUserId(Long scheduleId, String userId) {
+		Schedule schedule = findSchedule(scheduleId);  // 선택한 일정이 DB에 저장되어 있는지 확인
+		if (!schedule.getManager().equals(userId)) {
+			throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
 		}
+		return schedule;
 	}
 }

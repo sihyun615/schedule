@@ -2,6 +2,8 @@ package com.sparta.schedule.controller;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,8 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.schedule.dto.ScheduleRequestDto;
 import com.sparta.schedule.dto.ScheduleResponseDto;
+import com.sparta.schedule.entity.Response;
+import com.sparta.schedule.jwt.JwtUtil;
 import com.sparta.schedule.service.ScheduleService;
 
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -23,15 +29,29 @@ import lombok.RequiredArgsConstructor;
 public class ScheduleController {
 
 	private final ScheduleService scheduleService;
+	private final JwtUtil jwtUtil;
 
 	@PostMapping("/schedule")
-	public ScheduleResponseDto createSchedule(@RequestBody ScheduleRequestDto requestDto) {
-		return scheduleService.createSchedule(requestDto);
+	public ResponseEntity<Response> createSchedule(@RequestBody ScheduleRequestDto requestDto, HttpServletRequest req) {
+		// Access Token과 Refresh Token을 각각의 헤더에서 가져옴
+		String accessToken = jwtUtil.getAccessTokenFromHeader(req);
+		String refreshToken = jwtUtil.getRefreshTokenFromHeader(req);
+
+		String newAccessToken = jwtUtil.checkToken(accessToken, refreshToken);
+
+		Claims claims = jwtUtil.getUserInfoFromToken(newAccessToken);
+		String username = claims.getSubject();
+
+		scheduleService.createSchedule(username, requestDto);
+
+		// 응답 반환
+		Response response = new Response(HttpStatus.OK.value(), "일정이 성공적으로 등록되었습니다.");
+		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/schedule/{id}")
-	public ScheduleResponseDto getScheduleById(@PathVariable Long id) {
-		return scheduleService.getScheduleById(id);
+	@GetMapping("/schedule/{scheduleId}")
+	public ScheduleResponseDto getScheduleById(@PathVariable Long scheduleId) {
+		return scheduleService.getScheduleById(scheduleId);
 	}
 
 	@GetMapping("/schedules")
@@ -39,15 +59,39 @@ public class ScheduleController {
 		return scheduleService.getSchedules();
 	}
 
-	@PutMapping("/schedule/{id}")
-	public ScheduleResponseDto updateSchedule(@PathVariable Long id, @RequestBody ScheduleRequestDto requestDto) {
-		String password = requestDto.getPassword();
-		return scheduleService.updateSchedule(id, requestDto, password);
+	@PutMapping("/schedule/{scheduleId}")
+	public ResponseEntity<Response> updateSchedule(@PathVariable Long scheduleId, @RequestBody ScheduleRequestDto requestDto, HttpServletRequest req) {
+		// Access Token과 Refresh Token을 각각의 헤더에서 가져옴
+		String accessToken = jwtUtil.getAccessTokenFromHeader(req);
+		String refreshToken = jwtUtil.getRefreshTokenFromHeader(req);
+
+		String newAccessToken = jwtUtil.checkToken(accessToken, refreshToken);
+
+		Claims claims = jwtUtil.getUserInfoFromToken(newAccessToken);
+		String username = claims.getSubject();
+
+		scheduleService.updateSchedule(username, scheduleId, requestDto);
+
+		// 응답 반환
+		Response response = new Response(HttpStatus.OK.value(), "일정이 성공적으로 수정되었습니다.");
+		return ResponseEntity.ok(response);
 	}
 
-	@DeleteMapping("/schedule/{id}")
-	public Long deleteSchedule(@PathVariable Long id, @RequestBody ScheduleRequestDto requestDto) {
-		String password = requestDto.getPassword();
-		return scheduleService.deleteSchedule(id, password);
+	@DeleteMapping("/schedule/{scheduleId}")
+	public ResponseEntity<Response> deleteSchedule(@PathVariable Long scheduleId, HttpServletRequest req) {
+		// Access Token과 Refresh Token을 각각의 헤더에서 가져옴
+		String accessToken = jwtUtil.getAccessTokenFromHeader(req);
+		String refreshToken = jwtUtil.getRefreshTokenFromHeader(req);
+
+		String newAccessToken = jwtUtil.checkToken(accessToken, refreshToken);
+
+		Claims claims = jwtUtil.getUserInfoFromToken(newAccessToken);
+		String username = claims.getSubject();
+
+		scheduleService.deleteSchedule(username, scheduleId);
+
+		// 응답 반환
+		Response response = new Response(HttpStatus.OK.value(), "일정이 성공적으로 삭제되었습니다.");
+		return ResponseEntity.ok(response);
 	}
 }

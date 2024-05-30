@@ -11,14 +11,14 @@ public class ScheduleResponseDto {
 	private Long id;
 	private String title;
 	private String content;
-	private String manager;
+	private String username;
 	private LocalDateTime createdAt;
 
 	public ScheduleResponseDto(Schedule schedule) {
 		this.id = schedule.getId();
 		this.title = schedule.getTitle();
 		this.content = schedule.getContent();
-		this.manager = schedule.getManager();
+		this.username = schedule.getUser().getUsername();
 		this.createdAt = schedule.getCreatedAt();
 	}
 }

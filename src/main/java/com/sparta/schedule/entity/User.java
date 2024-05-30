@@ -1,5 +1,8 @@
 package com.sparta.schedule.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -33,6 +36,9 @@ public class User extends Timestamped{
 	@Column(nullable = false)
 	@Enumerated(value = EnumType.STRING)
 	private UserRoleEnum role;
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
+	private List<Schedule> schedules = new ArrayList<>();
 
 	public User(String username, String nickname, String password, UserRoleEnum role) {
 		this.username = username;

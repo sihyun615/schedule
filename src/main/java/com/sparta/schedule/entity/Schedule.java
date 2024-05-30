@@ -9,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -28,21 +30,23 @@ public class Schedule extends Timestamped{
 	private String title;
 	@Column(name = "content", nullable = false, length = 500)
 	private String content;
-	@Column(name = "manager", nullable = false)
-	private String manager;
+
+	@ManyToOne
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
 	@OneToMany(mappedBy = "schedule", cascade = CascadeType.REMOVE)
 	private List<Comment> commentList = new ArrayList<>();
 
-	public Schedule(String title, String content, String manager) {
+	public Schedule(String title, String content, User user) {
 		this.title = title;
 		this.content = content;
-		this.manager = manager;
+		this.user = user;
 	}
 
-	public void update(String title, String content, String manager) {
+	public void update(String title, String content, User user) {
 		this.title = title;
 		this.content = content;
-		this.manager = manager;
+		this.user = user;
 	}
 }

@@ -22,14 +22,15 @@ public class UserController {
 
 	private final UserService userService;
 
+	// 회원가입
 	@PostMapping("/user/signup")
 	public ResponseEntity<Response> signup(@Valid @RequestBody SignupRequestDto requestDto) {
 		return userService.signup(requestDto);
 	}
 
+	// 로그인
 	@PostMapping("/user/login")
 	public ResponseEntity<Response> login(@Valid @RequestBody LoginRequestDto requestDto, HttpServletResponse res) {
 		return userService.login(requestDto, res);
 	}
-
 }

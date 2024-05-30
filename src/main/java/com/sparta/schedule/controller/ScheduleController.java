@@ -33,18 +33,9 @@ public class ScheduleController {
 
 	@PostMapping("/schedule")
 	public ResponseEntity<Response> createSchedule(@RequestBody ScheduleRequestDto requestDto, HttpServletRequest req) {
-		// Access Token과 Refresh Token을 각각의 헤더에서 가져옴
-		String accessToken = jwtUtil.getAccessTokenFromHeader(req);
-		String refreshToken = jwtUtil.getRefreshTokenFromHeader(req);
-
-		String newAccessToken = jwtUtil.checkToken(accessToken, refreshToken);
-
-		Claims claims = jwtUtil.getUserInfoFromToken(newAccessToken);
-		String username = claims.getSubject();
-
+		String username = getUsernameFromRequest(req);
 		scheduleService.createSchedule(username, requestDto);
 
-		// 응답 반환
 		Response response = new Response(HttpStatus.OK.value(), "일정이 성공적으로 등록되었습니다.");
 		return ResponseEntity.ok(response);
 	}
@@ -61,37 +52,28 @@ public class ScheduleController {
 
 	@PutMapping("/schedule/{scheduleId}")
 	public ResponseEntity<Response> updateSchedule(@PathVariable Long scheduleId, @RequestBody ScheduleRequestDto requestDto, HttpServletRequest req) {
-		// Access Token과 Refresh Token을 각각의 헤더에서 가져옴
-		String accessToken = jwtUtil.getAccessTokenFromHeader(req);
-		String refreshToken = jwtUtil.getRefreshTokenFromHeader(req);
-
-		String newAccessToken = jwtUtil.checkToken(accessToken, refreshToken);
-
-		Claims claims = jwtUtil.getUserInfoFromToken(newAccessToken);
-		String username = claims.getSubject();
-
+		String username = getUsernameFromRequest(req);
 		scheduleService.updateSchedule(username, scheduleId, requestDto);
 
-		// 응답 반환
 		Response response = new Response(HttpStatus.OK.value(), "일정이 성공적으로 수정되었습니다.");
 		return ResponseEntity.ok(response);
 	}
 
 	@DeleteMapping("/schedule/{scheduleId}")
 	public ResponseEntity<Response> deleteSchedule(@PathVariable Long scheduleId, HttpServletRequest req) {
+		String username = getUsernameFromRequest(req);
+		scheduleService.deleteSchedule(username, scheduleId);
+
+		Response response = new Response(HttpStatus.OK.value(), "일정이 성공적으로 삭제되었습니다.");
+		return ResponseEntity.ok(response);
+	}
+
+	private String getUsernameFromRequest(HttpServletRequest req) {
 		// Access Token과 Refresh Token을 각각의 헤더에서 가져옴
 		String accessToken = jwtUtil.getAccessTokenFromHeader(req);
 		String refreshToken = jwtUtil.getRefreshTokenFromHeader(req);
-
 		String newAccessToken = jwtUtil.checkToken(accessToken, refreshToken);
-
 		Claims claims = jwtUtil.getUserInfoFromToken(newAccessToken);
-		String username = claims.getSubject();
-
-		scheduleService.deleteSchedule(username, scheduleId);
-
-		// 응답 반환
-		Response response = new Response(HttpStatus.OK.value(), "일정이 성공적으로 삭제되었습니다.");
-		return ResponseEntity.ok(response);
+		return claims.getSubject();
 	}
 }

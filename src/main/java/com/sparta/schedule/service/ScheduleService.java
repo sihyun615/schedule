@@ -7,9 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.schedule.dto.ScheduleRequestDto;
 import com.sparta.schedule.dto.ScheduleResponseDto;
-import com.sparta.schedule.entity.Comment;
 import com.sparta.schedule.entity.Schedule;
-import com.sparta.schedule.exception.InvalidPasswordException;
 import com.sparta.schedule.exception.NotFoundException;
 import com.sparta.schedule.repository.ScheduleRepository;
 
@@ -24,11 +22,7 @@ public class ScheduleService {
 	public void createSchedule(String username, ScheduleRequestDto requestDto) {
 		String title = requestDto.getTitle();
 		String content = requestDto.getContent();
-
-		// RequestDto -> Entity
 		Schedule schedule = new Schedule(title, content, username);
-
-		// DB 저장
 		scheduleRepository.save(schedule);
 	}
 
@@ -52,16 +46,12 @@ public class ScheduleService {
 
 		String title = requestDto.getTitle();
 		String content = requestDto.getContent();
-
-		// schedule 내용 수정
 		schedule.update(title, content, username);
 	}
 
 	public void deleteSchedule(String username, Long scheduleId) {
 		// 해당 일정이  DB에 존재하는지 확인
 		Schedule schedule = findScheduleByIdAndUserId(scheduleId, username);
-
-		// memo 삭제
 		scheduleRepository.delete(schedule);
 	}
 

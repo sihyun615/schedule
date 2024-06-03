@@ -32,12 +32,10 @@ public class ScheduleController {
 	private final JwtUtil jwtUtil;
 
 	@PostMapping("/schedule")
-	public ResponseEntity<Response> createSchedule(@RequestBody ScheduleRequestDto requestDto, HttpServletRequest req) {
+	public ResponseEntity<ScheduleResponseDto> createSchedule(@RequestBody ScheduleRequestDto requestDto, HttpServletRequest req) {
 		String username = getUsernameFromRequest(req);
-		scheduleService.createSchedule(username, requestDto);
-
-		Response response = new Response(HttpStatus.OK.value(), "일정이 성공적으로 등록되었습니다.");
-		return ResponseEntity.ok(response);
+		ScheduleResponseDto responseDto = scheduleService.createSchedule(username, requestDto);
+		return ResponseEntity.ok(responseDto);
 	}
 
 	@GetMapping("/schedule/{scheduleId}")
@@ -51,12 +49,10 @@ public class ScheduleController {
 	}
 
 	@PutMapping("/schedule/{scheduleId}")
-	public ResponseEntity<Response> updateSchedule(@PathVariable Long scheduleId, @RequestBody ScheduleRequestDto requestDto, HttpServletRequest req) {
+	public ResponseEntity<ScheduleResponseDto> updateSchedule(@PathVariable Long scheduleId, @RequestBody ScheduleRequestDto requestDto, HttpServletRequest req) {
 		String username = getUsernameFromRequest(req);
-		scheduleService.updateSchedule(username, scheduleId, requestDto);
-
-		Response response = new Response(HttpStatus.OK.value(), "일정이 성공적으로 수정되었습니다.");
-		return ResponseEntity.ok(response);
+		ScheduleResponseDto responseDto = scheduleService.updateSchedule(username, scheduleId, requestDto);
+		return ResponseEntity.ok(responseDto);
 	}
 
 	@DeleteMapping("/schedule/{scheduleId}")

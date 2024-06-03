@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.schedule.dto.CommentRequestDto;
+import com.sparta.schedule.dto.CommentResponseDto;
 import com.sparta.schedule.dto.Response;
 import com.sparta.schedule.jwt.JwtUtil;
 import com.sparta.schedule.service.CommentService;
@@ -30,22 +31,18 @@ public class CommentController {
 
 	// 댓글 작성
 	@PostMapping("/schedule/{scheduleId}/comment")
-	public ResponseEntity<Response> createComment(@PathVariable Long scheduleId, @Valid @RequestBody CommentRequestDto requestDto, HttpServletRequest req) {
+	public ResponseEntity<CommentResponseDto> createComment(@PathVariable Long scheduleId, @Valid @RequestBody CommentRequestDto requestDto, HttpServletRequest req) {
 		String username = getUsernameFromRequest(req);
-		commentService.createComment(scheduleId, username, requestDto);
-
-		Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 등록되었습니다.");
-		return ResponseEntity.ok(response);
+		CommentResponseDto responseDto = commentService.createComment(scheduleId, username, requestDto);
+		return ResponseEntity.ok(responseDto);
 	}
 
 	// 댓글 수정
 	@PutMapping("/schedule/{scheduleId}/comment/{commentId}")
-	public ResponseEntity<Response> updateComment(@PathVariable Long scheduleId, @PathVariable Long commentId, @Valid @RequestBody CommentRequestDto requestDto, HttpServletRequest req) {
+	public ResponseEntity<CommentResponseDto> updateComment(@PathVariable Long scheduleId, @PathVariable Long commentId, @Valid @RequestBody CommentRequestDto requestDto, HttpServletRequest req) {
 		String username = getUsernameFromRequest(req);
-		commentService.updateComment(scheduleId, commentId, username, requestDto);
-
-		Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 수정되었습니다.");
-		return ResponseEntity.ok(response);
+		CommentResponseDto responseDto = commentService.updateComment(scheduleId, commentId, username, requestDto);
+		return ResponseEntity.ok(responseDto);
 	}
 
 	// 댓글 삭제

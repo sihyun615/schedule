@@ -22,7 +22,7 @@ public class ScheduleService {
 	private final ScheduleRepository scheduleRepository;
 	private final UserRepository userRepository;
 
-	public void createSchedule(String username, ScheduleRequestDto requestDto) {
+	public ScheduleResponseDto createSchedule(String username, ScheduleRequestDto requestDto) {
 		String title = requestDto.getTitle();
 		String content = requestDto.getContent();
 		User user = userRepository.findByUsername(username).orElseThrow(
@@ -30,6 +30,7 @@ public class ScheduleService {
 		);
 		Schedule schedule = new Schedule(title, content, user);
 		scheduleRepository.save(schedule);
+		return new ScheduleResponseDto(schedule);
 	}
 
 	public ScheduleResponseDto getScheduleById(Long id) {
@@ -46,7 +47,7 @@ public class ScheduleService {
 	}
 
 	@Transactional
-	public void updateSchedule(String username, Long scheduleId, ScheduleRequestDto requestDto) {
+	public ScheduleResponseDto updateSchedule(String username, Long scheduleId, ScheduleRequestDto requestDto) {
 		// 해당 일정이 DB에 존재하는지 확인
 		Schedule schedule = findScheduleByIdAndUserId(scheduleId, username);
 
@@ -56,6 +57,7 @@ public class ScheduleService {
 			() -> new NotFoundException("등록된 사용자가 없습니다.")
 		);
 		schedule.update(title, content, user);
+		return new ScheduleResponseDto(schedule);
 	}
 
 	public void deleteSchedule(String username, Long scheduleId) {

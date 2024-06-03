@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.schedule.dto.CommentRequestDto;
+import com.sparta.schedule.dto.CommentResponseDto;
 import com.sparta.schedule.entity.Comment;
 import com.sparta.schedule.entity.Schedule;
 import com.sparta.schedule.entity.User;
@@ -22,17 +23,18 @@ public class CommentService {
 	private final ScheduleRepository scheduleRepository;
 	private final UserRepository userRepository;
 
-	public void createComment(Long scheduleId, String username, CommentRequestDto requestDto) {
+	public CommentResponseDto createComment(Long scheduleId, String username, CommentRequestDto requestDto) {
 		Schedule schedule = findScheduleById(scheduleId);
 		User user = userRepository.findByUsername(username).orElseThrow(
 			() -> new NotFoundException("등록된 사용자가 없습니다.")
 		);
 		Comment comment = new Comment(requestDto.getContent(), user, schedule);
 		commentRepository.save(comment);
+		return new CommentResponseDto(comment);
 	}
 
 	@Transactional
-	public void updateComment(Long scheduleId, Long commentId, String username, CommentRequestDto requestDto) {
+	public CommentResponseDto updateComment(Long scheduleId, Long commentId, String username, CommentRequestDto requestDto) {
 		checkCommentIdNull(commentId);  // 댓글 Id 입력받았는지 확인
 		findScheduleById(scheduleId);  // 선택한 일정이 DB에 저장되어 있는지 확인
 
@@ -45,6 +47,7 @@ public class CommentService {
 			comment.setContent(newContent);
 			commentRepository.save(comment);
 		}
+		return new CommentResponseDto(comment);
 	}
 
 

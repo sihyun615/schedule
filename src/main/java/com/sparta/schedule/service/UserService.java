@@ -3,6 +3,7 @@ package com.sparta.schedule.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -33,20 +34,8 @@ public class UserService {
 
 	public ResponseEntity<Response> signup(SignupRequestDto requestDto) {
 		String username = requestDto.getUsername();
-		String password = requestDto.getPassword();
-
-		// 회원 중복 확인
-		Optional<User> checkUsername = userRepository.findByUsername(username);
-		if (checkUsername.isPresent()) {
-			throw new IllegalArgumentException("중복된 사용자가 존재합니다.");
-		}
-
-		// 별명 중복확인
 		String nickname = requestDto.getNickname();
-		Optional<User> checkNickname = userRepository.findByNickname(nickname);
-		if (checkNickname.isPresent()) {
-			throw new IllegalArgumentException("중복된 별명입니다.");
-		}
+		String password = requestDto.getPassword();
 
 		// 사용자 ROLE 확인
 		UserRoleEnum role = UserRoleEnum.USER;
@@ -59,7 +48,20 @@ public class UserService {
 
 		// 사용자 등록
 		User user = new User(username, nickname, password, role);
-		userRepository.save(user);
+		try {
+			userRepository.save(user);
+		} catch (DataIntegrityViolationException e) {
+			if (e.getMessage().contains("constraint [uk_username]")) {
+				// 사용자 이름이 중복될 경우
+				throw new IllegalArgumentException("중복된 사용자가 존재합니다.");
+			} else if (e.getMessage().contains("constraint [uk_nickname]")) {
+				// 별명이 중복될 경우
+				throw new IllegalArgumentException("중복된 별명입니다.");
+			} else {
+				// 기타 데이터베이스 제약 조건 위반
+				throw e;
+			}
+		}
 
 		Response response = new Response(HttpStatus.OK.value(), "회원가입이 성공적으로 완료되었습니다.");
 		return ResponseEntity.ok(response);  // 성공 메시지와 상태 코드 반환

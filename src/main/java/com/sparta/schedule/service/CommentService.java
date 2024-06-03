@@ -51,7 +51,7 @@ public class CommentService {
 	}
 
 
-	public void deleteComment(Long scheduleId, Long commentId, String username, CommentRequestDto requestDto) {
+	public void deleteComment(Long scheduleId, Long commentId, String username) {
 		checkCommentIdNull(commentId);  //댓글 Id 입력받았는지 확인
 		findScheduleById(scheduleId);  // 선택한 일정이 DB에 저장되어 있는지 확인
 

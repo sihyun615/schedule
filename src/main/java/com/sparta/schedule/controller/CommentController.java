@@ -47,9 +47,9 @@ public class CommentController {
 
 	// 댓글 삭제
 	@DeleteMapping("/schedule/{scheduleId}/comment/{commentId}")
-	public ResponseEntity<Response> deleteComment(@PathVariable Long scheduleId, @PathVariable Long commentId, @RequestBody CommentRequestDto requestDto, HttpServletRequest req) {
+	public ResponseEntity<Response> deleteComment(@PathVariable Long scheduleId, @PathVariable Long commentId, HttpServletRequest req) {
 		String username = getUsernameFromRequest(req);
-		commentService.deleteComment(scheduleId, commentId, username, requestDto);
+		commentService.deleteComment(scheduleId, commentId, username);
 
 		Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 삭제되었습니다.");
 		return ResponseEntity.ok(response);

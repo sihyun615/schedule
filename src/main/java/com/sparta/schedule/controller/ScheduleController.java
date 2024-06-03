@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.schedule.dto.ScheduleRequestDto;
 import com.sparta.schedule.dto.ScheduleResponseDto;
-import com.sparta.schedule.entity.Response;
+import com.sparta.schedule.dto.Response;
 import com.sparta.schedule.jwt.JwtUtil;
 import com.sparta.schedule.service.ScheduleService;
 

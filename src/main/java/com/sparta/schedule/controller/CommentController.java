@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.schedule.dto.CommentRequestDto;
-import com.sparta.schedule.entity.Response;
+import com.sparta.schedule.dto.Response;
 import com.sparta.schedule.jwt.JwtUtil;
 import com.sparta.schedule.service.CommentService;
 
@@ -29,30 +29,30 @@ public class CommentController {
 	private final JwtUtil jwtUtil;
 
 	// 댓글 작성
-	@PostMapping("/comment")
-	public ResponseEntity<Response> createComment(@Valid @RequestBody CommentRequestDto requestDto, HttpServletRequest req) {
+	@PostMapping("/schedule/{scheduleId}/comment")
+	public ResponseEntity<Response> createComment(@PathVariable Long scheduleId, @Valid @RequestBody CommentRequestDto requestDto, HttpServletRequest req) {
 		String username = getUsernameFromRequest(req);
-		commentService.createComment(username, requestDto);
+		commentService.createComment(scheduleId, username, requestDto);
 
 		Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 등록되었습니다.");
 		return ResponseEntity.ok(response);
 	}
 
 	// 댓글 수정
-	@PutMapping("/comment/{commentId}")
-	public ResponseEntity<Response> updateComment(@PathVariable Long commentId, @Valid @RequestBody CommentRequestDto requestDto, HttpServletRequest req) {
+	@PutMapping("/schedule/{scheduleId}/comment/{commentId}")
+	public ResponseEntity<Response> updateComment(@PathVariable Long scheduleId, @PathVariable Long commentId, @Valid @RequestBody CommentRequestDto requestDto, HttpServletRequest req) {
 		String username = getUsernameFromRequest(req);
-		commentService.updateComment(commentId, username, requestDto);
+		commentService.updateComment(scheduleId, commentId, username, requestDto);
 
 		Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 수정되었습니다.");
 		return ResponseEntity.ok(response);
 	}
 
 	// 댓글 삭제
-	@DeleteMapping("/comment/{commentId}")
-	public ResponseEntity<Response> deleteComment(@PathVariable Long commentId, @RequestBody CommentRequestDto requestDto, HttpServletRequest req) {
+	@DeleteMapping("/schedule/{scheduleId}/comment/{commentId}")
+	public ResponseEntity<Response> deleteComment(@PathVariable Long scheduleId, @PathVariable Long commentId, @RequestBody CommentRequestDto requestDto, HttpServletRequest req) {
 		String username = getUsernameFromRequest(req);
-		commentService.deleteComment(commentId, username, requestDto);
+		commentService.deleteComment(scheduleId, commentId, username, requestDto);
 
 		Response response = new Response(HttpStatus.OK.value(), "댓글이 성공적으로 삭제되었습니다.");
 		return ResponseEntity.ok(response);

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.schedule.dto.LoginRequestDto;
 import com.sparta.schedule.dto.SignupRequestDto;
-import com.sparta.schedule.entity.Response;
+import com.sparta.schedule.dto.Response;
 import com.sparta.schedule.service.UserService;
 
 import jakarta.servlet.http.HttpServletResponse;

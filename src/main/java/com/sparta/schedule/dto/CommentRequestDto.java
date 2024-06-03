@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentRequestDto {
-	@NotNull(message = "일정의 ID가 입력되지 않았습니다.")
-	private Long scheduleId;
 	@NotBlank(message = "댓글의 내용이 비어있습니다.")
 	private String content;
 }

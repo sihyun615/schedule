@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.sparta.schedule.dto.LoginRequestDto;
 import com.sparta.schedule.dto.SignupRequestDto;
-import com.sparta.schedule.entity.Response;
+import com.sparta.schedule.dto.Response;
 import com.sparta.schedule.entity.User;
 import com.sparta.schedule.entity.UserRoleEnum;
 import com.sparta.schedule.exception.InvalidPasswordException;

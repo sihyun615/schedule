@@ -22,8 +22,8 @@ public class CommentService {
 	private final ScheduleRepository scheduleRepository;
 	private final UserRepository userRepository;
 
-	public void createComment(String username, CommentRequestDto requestDto) {
-		Schedule schedule = findScheduleById(requestDto.getScheduleId());
+	public void createComment(Long scheduleId, String username, CommentRequestDto requestDto) {
+		Schedule schedule = findScheduleById(scheduleId);
 		User user = userRepository.findByUsername(username).orElseThrow(
 			() -> new NotFoundException("등록된 사용자가 없습니다.")
 		);
@@ -32,9 +32,9 @@ public class CommentService {
 	}
 
 	@Transactional
-	public void updateComment(Long commentId, String username, CommentRequestDto requestDto) {
+	public void updateComment(Long scheduleId, Long commentId, String username, CommentRequestDto requestDto) {
 		checkCommentIdNull(commentId);  // 댓글 Id 입력받았는지 확인
-		findScheduleById(requestDto.getScheduleId());  // 선택한 일정이 DB에 저장되어 있는지 확인
+		findScheduleById(scheduleId);  // 선택한 일정이 DB에 저장되어 있는지 확인
 
 		// 댓글 ID로 댓글 조회 및 사용자 ID로 권한 확인
 		Comment comment = findCommentByIdAndUserId(commentId, username);
@@ -48,9 +48,9 @@ public class CommentService {
 	}
 
 
-	public void deleteComment(Long commentId, String username, CommentRequestDto requestDto) {
+	public void deleteComment(Long scheduleId, Long commentId, String username, CommentRequestDto requestDto) {
 		checkCommentIdNull(commentId);  //댓글 Id 입력받았는지 확인
-		findScheduleById(requestDto.getScheduleId());  // 선택한 일정이 DB에 저장되어 있는지 확인
+		findScheduleById(scheduleId);  // 선택한 일정이 DB에 저장되어 있는지 확인
 
 		// 댓글 ID로 댓글 조회 및 사용자 ID로 권한 확인
 		Comment comment = findCommentByIdAndUserId(commentId, username);

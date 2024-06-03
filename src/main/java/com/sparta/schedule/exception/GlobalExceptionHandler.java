@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.sparta.schedule.entity.Response;
+import com.sparta.schedule.dto.Response;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {

@@ -2,6 +2,7 @@ package com.sparta.schedule.service;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,9 +27,9 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final JwtUtil jwtUtil;
 
-
-	// ADMIN_TOKEN
-	private final String ADMIN_TOKEN = "AAABnvxRVklrnYxKZ0aHgTBcXukeZygoC";
+	// application.properties에서 ADMIN_TOKEN 값 가져오기
+	@Value("${admin.token}")
+	private String ADMIN_TOKEN;
 
 	public ResponseEntity<Response> signup(SignupRequestDto requestDto) {
 		String username = requestDto.getUsername();

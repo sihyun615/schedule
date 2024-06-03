@@ -40,21 +40,13 @@ public class JwtUtil {
 	private final long ACCESS_TOKEN_TIME = 60 * 60 * 1000L; // 60분
 	private final long REFRESH_TOKEN_TIME = 7 * 24 * 60 * 60 * 1000L; // 7일
 
-	@Value("${jwt.secret.key}") // Base64 Encode 한 SecretKey
-	private String secretKey;
-	private Key key;
+	private final Key key;
 	private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
 	// 로그 설정
 	public static final Logger logger = LoggerFactory.getLogger("JWT 관련 로그");
 
 	private final UserRepository userRepository;
-
-	@PostConstruct
-	public void init() {
-		byte[] bytes = Base64.getDecoder().decode(secretKey);
-		key = Keys.hmacShaKeyFor(bytes);
-	}
 
 
 	//JWT 생성 (토큰 생성)

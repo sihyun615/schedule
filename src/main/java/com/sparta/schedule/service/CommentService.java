@@ -29,7 +29,7 @@ public class CommentService {
 			() -> new NotFoundException("등록된 사용자가 없습니다.")
 		);
 		Comment comment = new Comment(requestDto.getContent(), user, schedule);
-		commentRepository.save(comment);
+		commentRepository.save(comment);  //스프링 데이터 JPA는 기본적으로 Repository 메서드 호출 시에 트랜잭션을 생성
 		return new CommentResponseDto(comment);
 	}
 
@@ -58,7 +58,7 @@ public class CommentService {
 		// 댓글 ID로 댓글 조회 및 사용자 ID로 권한 확인
 		Comment comment = findCommentByIdAndUserId(commentId, username);
 
-		commentRepository.delete(comment);  // 댓글 삭제
+		commentRepository.delete(comment);  //스프링 데이터 JPA는 기본적으로 Repository 메서드 호출 시에 트랜잭션을 생성
 	}
 
 
@@ -84,7 +84,8 @@ public class CommentService {
 	// 댓글 ID로 댓글 조회 및 사용자 ID로 권한 확인 메소드
 	private Comment findCommentByIdAndUserId(Long commentId, String username) {
 		Comment comment = findCommentById(commentId);  // 선택한 댓글이 DB에 저장되어 있는지 확인
-		if (!comment.getUser().getUsername().equals(username)) {
+		User user = comment.getUser();
+		if (user == null || !user.getUsername().equals(username)) {
 			throw new IllegalArgumentException("작성자만 삭제/수정할 수 있습니다.");
 		}
 		return comment;
